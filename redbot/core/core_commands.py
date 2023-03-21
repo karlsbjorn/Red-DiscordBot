@@ -2095,21 +2095,22 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
                     elif com_type is discord.AppCommandType.user:
                         to_add_user.append(name)
                         successful_cogs.add(cog_name)
+        failed_cogs = set(cog_names) - successful_cogs
 
         # Check that we are going to enable at least one command, for user feedback
         if not (to_add_slash or to_add_message or to_add_user):
-            if len(cog_names) == 1:
+            if len(failed_cogs) == 1:
                 await ctx.send(
                     _(
                         "Couldn't find any disabled commands from the cog `{cog_name}`. Use `{prefix}slash list` to see all cogs with application commands."
-                    ).format(cog_name=cog_names[0], prefix=ctx.prefix)
+                    ).format(cog_name=failed_cogs.pop(), prefix=ctx.prefix)
                 )
             else:
                 await ctx.send(
                     _(
                         "Couldn't find any disabled commands from any of these cogs: {cog_names}. Use `{prefix}slash list` to see all cogs with application commands."
                     ).format(
-                        cog_names=humanize_list([inline(name) for name in cog_names]),
+                        cog_names=humanize_list([inline(name) for name in failed_cogs]),
                         prefix=ctx.prefix,
                     )
                 )
@@ -2123,31 +2124,58 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
 
         # If enabling would exceed any limit, exit early to not enable only a subset
         if total_slash > SLASH_CAP:
-            await ctx.send(
-                _(
-                    "Enabling all application commands from that cog would enable a total of {count} "
-                    "commands, exceeding the {cap} command limit for slash commands. "
-                    "Disable some commands first."
-                ).format(count=total_slash, cap=SLASH_CAP)
-            )
+            if len(successful_cogs) == 1:
+                await ctx.send(
+                    _(
+                        "Enabling all application commands from that cog would enable a total of {count} "
+                        "commands, exceeding the {cap} command limit for slash commands. "
+                        "Disable some commands first."
+                    ).format(count=total_slash, cap=SLASH_CAP)
+                )
+            else:
+                await ctx.send(
+                    _(
+                        "Enabling all application commands from these cogs would enable a total of {count} "
+                        "commands, exceeding the {cap} command limit for slash commands. "
+                        "Disable some commands first or enable fewer cogs' application commands."
+                    ).format(count=total_slash, cap=SLASH_CAP)
+                )
             return
         if total_message > CONTEXT_CAP:
-            await ctx.send(
-                _(
-                    "Enabling all application commands from that cog would enable a total of {count} "
-                    "commands, exceeding the {cap} command limit for message commands. "
-                    "Disable some commands first."
-                ).format(count=total_message, cap=CONTEXT_CAP)
-            )
+            if len(successful_cogs) == 1:
+                await ctx.send(
+                    _(
+                        "Enabling all application commands from that cog would enable a total of {count} "
+                        "commands, exceeding the {cap} command limit for message commands. "
+                        "Disable some commands first."
+                    ).format(count=total_message, cap=CONTEXT_CAP)
+                )
+            else:
+                await ctx.send(
+                    _(
+                        "Enabling all application commands from these cogs would enable a total of {count} "
+                        "commands, exceeding the {cap} command limit for message commands. "
+                        "Disable some commands first or enable fewer cogs' application commands."
+                    ).format(count=total_message, cap=CONTEXT_CAP)
+                )
             return
         if total_user > CONTEXT_CAP:
-            await ctx.send(
-                _(
-                    "Enabling all application commands from that cog would enable a total of {count} "
-                    "commands, exceeding the {cap} command limit for user commands. "
-                    "Disable some commands first."
-                ).format(count=total_user, cap=CONTEXT_CAP)
-            )
+            if len(successful_cogs) == 1:
+                await ctx.send(
+                    _(
+                        "Enabling all application commands from that cog would enable a total of {count} "
+                        "commands, exceeding the {cap} command limit for user commands. "
+                        "Disable some commands first."
+                    ).format(count=total_user, cap=CONTEXT_CAP)
+                )
+            else:
+                await ctx.send(
+                    _(
+                        "Enabling all application commands from these cogs would enable a total of {count} "
+                        "commands, exceeding the {cap} command limit for user commands. "
+                        "Disable some commands first or enable fewer cogs' application commands."
+                    ).format(count=total_user, cap=CONTEXT_CAP)
+                )
             return
 
         # Enable the cogs
@@ -2172,6 +2200,10 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         output = _("Enabled {count} commands from {cog_names}:\n{names}").format(
             count=count, cog_names=formatted_successful_cogs, names=formatted_names
         )
+        if failed_cogs:
+            output += _("\n\nCouldn't find any disabled commands from these cogs: {cog_names}. Use `{prefix}slash list` to see all cogs with application commands.").format(
+                cog_names=humanize_list([inline(name) for name in failed_cogs]), prefix=ctx.prefix
+            )
         for page in pagify(output):
             await ctx.send(page)
 
