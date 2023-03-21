@@ -2227,6 +2227,11 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
             cog_names=formatted_removed_cogs,
             names=formatted_names,
         )
+        if failed_cogs := set(cog_names) - removed_cogs:
+            output += _("\n\nCouldn't find any enabled commands from {cog_names}. Use `{prefix}slash list` to see all cogs with application commands.").format(
+                cog_names=humanize_list([inline(name) for name in failed_cogs]),
+                prefix=ctx.prefix,
+            )
         for page in pagify(output):
             await ctx.send(page)
 
