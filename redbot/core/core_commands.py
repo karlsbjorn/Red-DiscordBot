@@ -2201,23 +2201,26 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
                     await self.bot.disable_app_command(name, discord.AppCommandType(com_type))
                     removed.append(name)
                     removed_cogs.add(cog_name)
-        if not removed:
-            if len(cog_names) == 1:
+
+        failed_cogs = set(cog_names) - removed_cogs
+        if len(failed_cogs) == len(cog_names):  # If every passed cog failed
+            if len(failed_cogs) == 1:
                 await ctx.send(
                     _(
                         "Couldn't find any enabled commands from the `{cog_name}` cog. Use `{prefix}slash list` to see all cogs with application commands."
-                    ).format(cog_name=cog_names[0], prefix=ctx.prefix)
+                    ).format(cog_name=failed_cogs.pop(), prefix=ctx.prefix)
                 )
             else:
                 await ctx.send(
                     _(
                         "Couldn't find any enabled commands from any of these cogs: {cog_names}. Use `{prefix}slash list` to see all cogs with application commands."
                     ).format(
-                        cog_names=humanize_list([inline(name) for name in cog_names]),
+                        cog_names=humanize_list([inline(name) for name in failed_cogs]),
                         prefix=ctx.prefix,
                     )
                 )
             return
+
         await self.bot.tree.red_check_enabled()
         formatted_names = humanize_list([inline(name) for name in removed])
         formatted_removed_cogs = humanize_list([inline(name) for name in removed_cogs])
@@ -2227,7 +2230,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
             cog_names=formatted_removed_cogs,
             names=formatted_names,
         )
-        if failed_cogs := set(cog_names) - removed_cogs:
+        if failed_cogs:
             output += _("\n\nCouldn't find any enabled commands from {cog_names}. Use `{prefix}slash list` to see all cogs with application commands.").format(
                 cog_names=humanize_list([inline(name) for name in failed_cogs]),
                 prefix=ctx.prefix,
