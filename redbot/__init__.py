@@ -208,9 +208,11 @@ class VersionInfo:
     def _get_version(cls, *, ignore_installed: bool = False) -> _Tuple[str, "VersionInfo"]:
         global _VERSION
         if not _VERSION.endswith(".dev1"):
-            _VERSION = f"{_VERSION}-konjanik"
+            if not _VERSION.endswith("-konjanik"):
+                _VERSION = f"{_VERSION}-konjanik"
             return _VERSION, cls.from_str(_VERSION)
-        _VERSION = f"{_VERSION}-konjanik"
+        if not _VERSION.endswith("-konjanik"):
+            _VERSION = f"{_VERSION}-konjanik"
         
 
         project_root = _os.path.abspath(_os.path.dirname(_os.path.dirname(__file__)))
