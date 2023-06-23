@@ -78,7 +78,7 @@ class ModInfo(MixinMeta):
                 else:
                     await ctx.send(_("An unexpected error has occurred."))
             else:
-                await ctx.send(_("Done."))
+                await ctx.tick()
 
     def handle_custom(self, user):
         a = [c for c in user.activities if c.type == discord.ActivityType.custom]
