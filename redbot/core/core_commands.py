@@ -403,7 +403,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         """Pong."""
         await ctx.send("Pong.")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def info(self, ctx: commands.Context):
         """Shows info about [botname]."""
         embed_links = await ctx.embed_requested()
