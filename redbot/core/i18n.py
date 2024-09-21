@@ -356,7 +356,7 @@ def get_babel_regional_format(regional_format: Optional[str] = None) -> babel.co
 # This import to be down here to avoid circular import issues.
 # This will be cleaned up at a later date
 # noinspection PyPep8
-from . import commands
+from . import commands, app_commands
 
 _TypeT = TypeVar("_TypeT", bound=type)
 
@@ -367,7 +367,7 @@ def cog_i18n(translator: Translator) -> Callable[[_TypeT], _TypeT]:
     def decorator(cog_class: _TypeT) -> _TypeT:
         cog_class.__translator__ = translator
         for name, attr in cog_class.__dict__.items():
-            if isinstance(attr, (commands.Group, commands.Command)):
+            if isinstance(attr, (commands.Group, commands.HybridGroup, commands.Command, commands.HybridCommand, app_commands.AppCommand)):
                 attr.translator = translator
                 setattr(cog_class, name, attr)
         return cog_class
