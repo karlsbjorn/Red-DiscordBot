@@ -198,7 +198,7 @@ class KickBanMixin(MixinMeta):
                     user.id,
                     days,
                 )
-                success_message = _("Done. That felt good.")
+                success_message = _("ok")
             except discord.Forbidden:
                 return False, _("I'm not allowed to do that.")
             except discord.NotFound:
@@ -368,7 +368,7 @@ class KickBanMixin(MixinMeta):
                 until=None,
                 channel=None,
             )
-            await ctx.send(_("Done. That felt good."))
+            #await ctx.send(_("Done. That felt good."))
 
     @commands.command()
     @commands.guild_only()
@@ -688,7 +688,7 @@ class KickBanMixin(MixinMeta):
                 reason,
                 unban_time,
             )
-            await ctx.send(_("Done. Enough chaos for now."))
+            #await ctx.send(_("Done. Enough chaos for now."))
 
     @commands.command()
     @commands.guild_only()
@@ -781,7 +781,7 @@ class KickBanMixin(MixinMeta):
                 until=None,
                 channel=None,
             )
-            await ctx.send(_("Done. Enough chaos."))
+            #await ctx.send(_("Done. Enough chaos."))
 
     @commands.command()
     @commands.guild_only()
